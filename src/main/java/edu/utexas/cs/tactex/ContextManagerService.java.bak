@@ -1,0 +1,245 @@
+/*
+ * Copyright (c) 2012 by the original author
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package edu.utexas.cs.tactex;
+
+import org.apache.log4j.Logger;
+import org.powertac.common.BankTransaction;
+import org.powertac.common.CashPosition;
+import org.powertac.common.Competition;
+import org.powertac.common.CustomerInfo;
+import org.powertac.common.msg.DistributionReport;
+import org.springframework.stereotype.Service;
+
+import edu.utexas.cs.tactex.interfaces.BrokerContext;
+import edu.utexas.cs.tactex.interfaces.ContextManager;
+import edu.utexas.cs.tactex.interfaces.Initializable;
+
+/**
+ * Handles incoming context and bank messages with example behaviors. 
+ * @author John Collins
+ */
+@Service
+public class ContextManagerService
+implements ContextManager, Initializable
+{
+  static private Logger log = Logger.getLogger(ContextManagerService.class);
+
+  BrokerContext master;
+
+  // current cash balance
+  private double cash = 0;
+
+  private double revocationFee;
+
+  private double sellerSurplusRatio;
+
+  private double pPlusPrime;
+
+  private double defaultClearingPrice;
+
+  private double defaultSpotPrice;
+
+  private String settlementProcess;
+
+  private double defaultMargin;
+
+  private double bankInterest;
+
+  private double balancingCost;
+
+  private double publicationFee;
+
+  private double distributionFee;
+
+  private double pMinusPrime;
+
+  private int totalNumberOfCustomers;
+
+  private int totalNumberOfConsumers;
+
+  private int totalNumberOfProducers;
+  
+
+  @Override
+  public void initialize (BrokerContext broker)
+  {
+
+
+    // NEVER CALL ANY SERVICE METHOD FROM HERE, SINCE THEY ARE NOT GUARANTEED
+    // TO BE initalize()'d. 
+    // Exception: it is OK to call configuratorFactory's public
+    // (application-wide) constants
+
+    master = broker;
+
+  }
+
+
+
+  // -------------------- message handlers ---------------------
+  //
+  // Note that these arrive in JMS threads; If they share data with the
+  // agent processing thread, they need to be synchronized.
+  
+
+  /**
+   * BankTransaction represents an interest payment. Value is positive for 
+   * credit, negative for debit. 
+   */
+  public synchronized void handleMessage (BankTransaction btx)
+  {
+  }
+
+
+  /**
+   * CashPosition updates our current bank balance.
+   */
+  public synchronized void handleMessage (CashPosition cp)
+  {
+    cash = cp.getBalance();
+    log.info("Cash position: " + cash);
+  }
+
+  
+  /**
+   * DistributionReport gives total consumption and production for the timeslot,
+   * summed across all brokers.
+   */
+  public synchronized void handleMessage (DistributionReport dr)
+  {
+  }
+
+  
+  /**
+   * Handles the Competition instance that arrives at beginning of game.
+   * Here we capture all the customer records so we can keep track of their
+   * subscriptions and usage profiles.
+   */
+  public synchronized void handleMessage (Competition comp)
+  {
+    totalNumberOfCustomers = 0;
+    for (CustomerInfo customer : comp.getCustomers()) {
+      totalNumberOfCustomers += customer.getPopulation();
+      if (customer.getPowerType().isConsumption()){
+        totalNumberOfConsumers += customer.getPopulation();
+      }
+      if (customer.getPowerType().isProduction()) {
+        totalNumberOfProducers += customer.getPopulation();
+      }
+    }
+  }
+
+
+  /**
+   * Receives the server configuration properties.
+   */
+  public synchronized void handleMessage (java.util.Properties serverProps)
+  {
+    if (serverProps.size() != 12 ) {
+      log.warn("Are there additional properties that I am not processing?");
+    }
+    revocationFee = Double.parseDouble(serverProps.getProperty("tariffmarket.tariffMarketService.revocationFee"));
+    sellerSurplusRatio = Double.parseDouble(serverProps.getProperty("auctioneer.auctionService.sellerSurplusRatio"));
+    pPlusPrime = Double.parseDouble(serverProps.getProperty("balancemkt.balancingMarketService.pPlusPrime"));
+    defaultClearingPrice = Double.parseDouble(serverProps.getProperty("auctioneer.auctionService.defaultClearingPrice"));
+    defaultSpotPrice = Double.parseDouble(serverProps.getProperty("balancemkt.balancingMarketService.defaultSpotPrice"));
+    settlementProcess = serverProps.getProperty("balancemkt.balancingMarketService.settlementProcess");
+    defaultMargin = Double.parseDouble(serverProps.getProperty("auctioneer.auctionService.defaultMargin"));
+    bankInterest = Double.parseDouble(serverProps.getProperty("accounting.accountingService.bankInterest"));
+    balancingCost = Double.parseDouble(serverProps.getProperty("balancemkt.balancingMarketService.balancingCost"));
+    publicationFee = Double.parseDouble(serverProps.getProperty("tariffmarket.tariffMarketService.publicationFee"));
+    distributionFee = Double.parseDouble(serverProps.getProperty("distributionutility.distributionUtilityService.distributionFee"));
+    pMinusPrime = Double.parseDouble(serverProps.getProperty("balancemkt.balancingMarketService.pMinusPrime"));
+    log.debug(revocationFee + " " + sellerSurplusRatio + " " + pPlusPrime + " " + defaultClearingPrice + " " + defaultSpotPrice + " " + settlementProcess + " " + defaultMargin + " " + bankInterest + " " + balancingCost + " " + publicationFee + " " + distributionFee + " " + pMinusPrime);
+  }
+
+
+
+  // -------------------- getters ---------------------
+  
+  @Override
+  public double getRevocationFee() {
+    return revocationFee;
+  } 
+
+  @Override
+  public double getSellerSurplusRatio() {
+    return sellerSurplusRatio;
+  }
+
+  @Override
+  public double getPPlusPrime() {
+    return pPlusPrime;
+  }
+
+  @Override
+  public double getDefaultClearingPrice() {
+    return defaultClearingPrice;
+  }
+
+  @Override
+  public double getDefaultSpotPrice() {
+    return defaultSpotPrice;
+  }
+
+  @Override
+  public String getSettlementProcess() {
+    return settlementProcess;
+  }
+
+  @Override
+  public double getDefaultMargin() {
+    return defaultMargin;
+  }
+
+  @Override
+  public double getBankInterest() {
+    return bankInterest;
+  }
+
+  @Override
+  public double getBalancingCost() {
+    return balancingCost;
+  }
+
+  @Override
+  public double getPublicationFee() {
+    return publicationFee;
+  }
+
+  @Override
+  public double getDistributionFee() {
+    return distributionFee;
+  }
+
+  @Override
+  public double getPMinusPrime() {
+    return pMinusPrime;
+  }
+  
+  public int getTotalNumberOfCustomers() {
+    return totalNumberOfCustomers;
+  }
+
+  public int getTotalNumberOfConsumers() {
+    return totalNumberOfConsumers;
+  }
+
+  public int getTotalNumberOfProducers() {
+    return totalNumberOfProducers;
+  }
+
+}
