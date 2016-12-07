@@ -102,8 +102,8 @@ build/run instructions provided with the sample broker that is provided with
 the Power TAC server (we use the terms 'simulator' and 'server'
 interchangably). 
 
-For completeness, the sample-broker build/run instructions (created by John
-Collins' team at UMN) are copied next, with minor adaptations.
+**For completeness, the sample-broker build/run instructions (created by John
+Collins' team at UMN) are copied next, with minor adaptations to TacTex.**
 
 
 The TacTex Broker
