@@ -9,9 +9,9 @@ TacTex's code can be found under src/main/java/edu/utexas/cs/tactex, containing 
 
 * "<service-name>Service" files: Spring services containing entry points to the main modules of the broker. A service typically processes messages that arrive (asyncronously) from the server in callback functions named "handle<msg-name>()". If a service implements the "Activatable" interface, its "activate()" function is invoked at every timeslot and invokes its corresponding module. Important services to look at:
 
-..* ConfiguratorFactoryService: A special service that 1) configures the broker's parameters, and 2) plugs-in concrete classes that define the broker's runtime behaviors. To explore with different implemented strategies/components, comment/uncomment initialization lines in this file.
-..* PortfolioManagerService: The main service responsible to the broker's behavior in the tariff market. This service extends the PortfolioManagerService template provided by Power TAC's sample broker.
-..* MarketManagerService: The main service responsible to the broker's behavior in the wholesale market. This service extends the MarketManagerService template provided by Power TAC's sample broker.
+  * ConfiguratorFactoryService: A special service that 1) configures the broker's parameters, and 2) plugs-in concrete classes that define the broker's runtime behaviors. To explore with different implemented strategies/components, comment/uncomment initialization lines in this file.
+  * PortfolioManagerService: The main service responsible to the broker's behavior in the tariff market. This service extends the PortfolioManagerService template provided by Power TAC's sample broker.
+  * MarketManagerService: The main service responsible to the broker's behavior in the wholesale market. This service extends the MarketManagerService template provided by Power TAC's sample broker.
 
 * "interfaces" directory: Java interfaces. 
 
