@@ -34,11 +34,8 @@ below.
 Related Publications - citation information
 ===========================================
 If you use this code for research purposes, please consider citing one or more
-research papers that can be found (with corresponding Bibtex entries) in the
-following links:
-http://www.cs.utexas.edu/~urieli/thesis
-http://www.cs.utexas.edu/~urieli/
-and which include the following:
+research papers that can be found (with corresponding Bibtex entries) in 
+http://www.cs.utexas.edu/~urieli/#publications and which include the following:
 
 1) "Autonomous Trading in Modern Electricity Markets"
 Daniel Urieli
